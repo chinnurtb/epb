@@ -1,0 +1,13 @@
+ebin
+*.beam
+*.gz
+*~
+doc
+logs
+deps
+.eunit
+.directory
+src/epb_parser.erl
+src/epb_scanner.erl
+erl_crash.dump
+.DS_Store

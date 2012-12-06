@@ -1,0 +1,12 @@
+{application, epb,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { epb_app, []}},
+  {env, []}
+ ]}.
