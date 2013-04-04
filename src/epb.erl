@@ -1,4 +1,5 @@
-%% Copyright (c) 2009
+%% Copyright (c) 2009-2013
+%% Basho Technologies, Inc. <dev@basho.com>
 %% Nick Gerakines <nick@gerakines.net>
 %% Jacob Vorreuter <jacob.vorreuter@gmail.com>
 %%
@@ -23,11 +24,11 @@
 %% FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 %% OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% @doc A protcol buffers encoding and decoding module.
+%% @doc A protocol buffers encoding and decoding module.
 -module(epb).
 
-%% Pubic
--export([encode/3, encode_packed/3, decode/2, decode_packed/2]).
+%% Public
+-export([encode_field/3, encode_packed_field/3, decode/2, decode_packed/2]).
 
 %% Used by generated *_pb file. Not intended to used by User
 -export([next_field_num/1, skip_next_field/1]).
@@ -57,24 +58,24 @@
 %% @doc Encode an Erlang data structure into a Protocol Buffers value.
 %% @end
 %%--------------------------------------------------------------------
--spec encode(FieldID :: non_neg_integer(),
+-spec encode_field(FieldID :: non_neg_integer(),
 	     Value :: any(),
 	     Type :: field_type()) ->
 		    iodata().
-encode(FieldID, Value, Type) ->
+encode_field(FieldID, Value, Type) ->
     encode_internal(FieldID, Value, Type).
 
 %%--------------------------------------------------------------------
 %% @doc Encode an list of Erlang data structure into a Protocol Buffers values.
 %% @end
 %%--------------------------------------------------------------------
--spec encode_packed(FieldID :: non_neg_integer(),
+-spec encode_packed_field(FieldID :: non_neg_integer(),
 		    Values :: list(),
 		    Type :: field_type()) ->
 			   binary().
-encode_packed(_FieldID, [], _Type) ->
+encode_packed_field(_FieldID, [], _Type) ->
     <<>>;
-encode_packed(FieldID, Values, Type) ->
+encode_packed_field(FieldID, Values, Type) ->
     PackedValues = encode_packed_internal(Values,Type,[]),
     Size = encode_varint(iolist_size(PackedValues)),
     [encode_field_tag(FieldID, ?TYPE_STRING),Size,PackedValues].
@@ -372,7 +373,7 @@ typecast(Value, _) ->
 %% @hidden
 -spec encode_field_tag(FieldID :: non_neg_integer(),
 		       FieldType :: encoded_field_type()) ->
-			      binary().
+			      iodata().
 encode_field_tag(FieldID, FieldType) when FieldID band 16#3fffffff =:= FieldID ->
     encode_varint((FieldID bsl 3) bor FieldType).
 
@@ -385,13 +386,13 @@ encode_varint_field(FieldID, Integer) ->
 
 %% @hidden
 -spec encode_varint(I :: integer()) ->
-			   binary().
+			   iodata().
 encode_varint(I) ->
     encode_varint(I, []).
 
 %% @hidden
 -spec encode_varint(I :: integer(), Acc :: list()) ->
-			   binary().
+			   iodata().
 encode_varint(I, Acc) when I =< 16#7f ->
     lists:reverse([I | Acc]);
 encode_varint(I, Acc) ->
@@ -412,4 +413,6 @@ decode_varint(Bytes) ->
 decode_varint(<<0:1, I:7, Rest/binary>>, Int, Depth) ->
     {(I bsl Depth) bor Int, Rest};
 decode_varint(<<1:1, I:7, Rest/binary>>, Int, Depth) ->
-    decode_varint(Rest, (I bsl Depth) bor Int, Depth + 7).
+    decode_varint(Rest, (I bsl Depth) bor Int, Depth + 7);
+decode_varint(Bin, Int, Depth) ->
+    erlang:error(badarg, [Bin, Int, Depth]).

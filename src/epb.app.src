@@ -1,12 +1,11 @@
 {application, epb,
  [
-  {description, ""},
+  {description, "Erlang protobuffs"},
   {vsn, "1"},
   {registered, []},
   {applications, [
                   kernel,
                   stdlib
                  ]},
-  {mod, { epb_app, []}},
   {env, []}
  ]}.
