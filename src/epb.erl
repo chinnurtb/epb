@@ -201,7 +201,7 @@ read_field_num_and_wire_type(<<_:8,_/binary>> = Bytes) ->
 	?TYPE_32BIT ->
 	    {{FieldID, ?TYPE_32BIT}, Rest};
 	_Else ->
-	    erlang:throw({error, "Error decodeing type"})
+	    erlang:throw({error, "Error decoding type"})
     end;
 read_field_num_and_wire_type(Bytes) ->
     erlang:error(badarg,[Bytes]).
@@ -210,7 +210,7 @@ read_field_num_and_wire_type(Bytes) ->
 %% @doc Decode a single value from a protobuffs data structure
 %% @end
 %%--------------------------------------------------------------------
--spec decode(Bytes :: binary(), ExpectedType :: field_type()) ->
+-spec decode_field(Bytes :: binary(), ExpectedType :: field_type()) ->
 		    {{non_neg_integer(), any()}, binary()}.
 decode_field(Bytes, ExpectedType) ->
     {{FieldID, WireType}, Rest} = read_field_num_and_wire_type(Bytes),
@@ -221,7 +221,7 @@ decode_field(Bytes, ExpectedType) ->
 %% @doc Decode packed values from a protobuffs data structure
 %% @end
 %%--------------------------------------------------------------------
--spec decode_packed(Bytes :: binary(), ExpectedType :: field_type()) ->
+-spec decode_packed_field(Bytes :: binary(), ExpectedType :: field_type()) ->
 			   {{non_neg_integer(), any()}, binary()}.
 decode_packed_field(Bytes, ExpectedType) ->
     case read_field_num_and_wire_type(Bytes) of
