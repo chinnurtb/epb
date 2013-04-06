@@ -28,7 +28,7 @@
 -module(epb).
 
 %% Public
--export([encode_field/3, encode_packed_field/3, decode/2, decode_packed/2]).
+-export([encode_field/3, encode_packed_field/3, decode_field/2, decode_packed_field/2]).
 
 %% Used by generated *_pb file. Not intended to used by User
 -export([next_field_num/1, skip_next_field/1]).
@@ -212,7 +212,7 @@ read_field_num_and_wire_type(Bytes) ->
 %%--------------------------------------------------------------------
 -spec decode(Bytes :: binary(), ExpectedType :: field_type()) ->
 		    {{non_neg_integer(), any()}, binary()}.
-decode(Bytes, ExpectedType) ->
+decode_field(Bytes, ExpectedType) ->
     {{FieldID, WireType}, Rest} = read_field_num_and_wire_type(Bytes),
     {Value, Rest1} = decode_value(Rest, WireType, ExpectedType),
     {{FieldID, Value}, Rest1}.
@@ -223,7 +223,7 @@ decode(Bytes, ExpectedType) ->
 %%--------------------------------------------------------------------
 -spec decode_packed(Bytes :: binary(), ExpectedType :: field_type()) ->
 			   {{non_neg_integer(), any()}, binary()}.
-decode_packed(Bytes, ExpectedType) ->
+decode_packed_field(Bytes, ExpectedType) ->
     case read_field_num_and_wire_type(Bytes) of
 	{{FieldID, ?TYPE_STRING}, Rest} ->
 	    {Length, Rest1} = decode_varint(Rest),
