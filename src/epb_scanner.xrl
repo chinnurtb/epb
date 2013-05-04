@@ -10,7 +10,7 @@ HEX_DIGIT = [0-9a-fA-F]
 LETTER = [a-zA-Z_]
 ALNUM = [a-zA-Z0-9_]
 ESCAPE = [abfnrtv\\\?\'\"]
-SYMBOL = ([=;{}\[\]()./-]|\+)
+SYMBOL = ([=,;{}\[\]()./-]|\+)
 SIGN = (-|\+)
 FLOAT = [fF]
 
@@ -32,12 +32,6 @@ Rules.
 
 Erlang code.
 
-%% Top level construct definitions.
--define(DEFINE, ["message", "enum", "service", "extend"]).
-
-%% Declarations made within definitions or at top-level.
--define(DECLARE, ["option", "import", "package"]).
-
 %% Field types
 -define(TYPE, ["double", "float", "int32", "int64", "uint32",
                "uint64", "sint32", "sint64", "fixed32",
@@ -48,13 +42,13 @@ Erlang code.
 -define(RULE, ["required", "optional", "repeated"]).
 
 %% Other keywords
--define(KEYWORD, ["public", "extensions", "to", "max", "rpc", "returns"]).
+-define(KEYWORD, ["message", "enum", "service", "extend", "option", "import",
+                  "package", "public", "extensions", "to", "max", "rpc",
+                  "returns"]).
 
 %% Flip through the reserved words and create tokens of the proper type.
 select_id_type(T, Line) ->
-    select_id_type(T, Line, [{definition, ?DEFINE},
-                             {declararation, ?DECLARE},
-                             {type, ?TYPE},
+    select_id_type(T, Line, [{type, ?TYPE},
                              {rule, ?RULE},
                              {keyword, ?KEYWORD}]).
 
@@ -62,17 +56,17 @@ select_id_type(T, Line) ->
 select_id_type(T, Line, []) ->
     {identifier, Line, T};
 %% special-casing other keywords so they come out as terminals
-select_id_type(T, Line, [{keyword, K}|Rest]) ->  
+select_id_type(T, Line, [{keyword, K}|Rest]) ->
     case lists:member(T, K) of
         true ->
             {list_to_atom(T), Line};
         false ->
             select_id_type(T, Line, Rest)
     end;
-select_id_type(T, Line, [{NT, Toks}|Rest]) -> 
+select_id_type(T, Line, [{NT, Toks}|Rest]) ->
     case lists:member(T, Toks) of
         true ->
-            {NT, Line, T};
+            {NT, Line, list_to_atom(T)};
         false ->
             select_id_type(T, Line, Rest)
     end.

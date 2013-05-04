@@ -1,68 +1,144 @@
 Nonterminals
-g_protobuffs g_header g_message g_rpcs g_rpc g_element g_elements g_var g_value g_default.
+    protobuf
+    statement
+    import_decl
+    package_decl
+    option_decl strict_option_decl optvalue
+    message_decl message_contents message_content
+    service_decl service_contents service_content
+    extend_decl extend_contents extend_content
+    enum_decl enum_contents enum_content
+    field field_type field_options field_option_pair
+    extension
+    nested_id
+    rpc_decl rpc_options
+    .
 
-Terminals ';' '=' '{' '}' '[' ']' '(' ')' string integer float var.
+Terminals
+    ';' '=' '{' '}' '[' ']' '(' ')' '.' ','
+    message enum service extend
+    option import package
+    identifier type rule
+    public extensions to max rpc returns
+    string float integer.
 
-Rootsymbol g_protobuffs.
-Endsymbol '$end'.
+Rootsymbol protobuf.
 
-g_protobuffs -> '$empty'					: [].
-g_protobuffs -> g_header g_protobuffs				: ['$1'|'$2'].
-g_protobuffs -> g_message g_protobuffs 				: ['$1'|'$2'].
+protobuf -> statement : ['$1'].
+protobuf -> statement protobuf : ['$1'|'$2'].
 
-g_header -> g_var string ';'					: {'$1', unwrap('$2')}.
-g_header -> g_var g_var ';'					: {'$1', safe_string('$2')}.
-g_header -> g_var g_var '=' g_value ';'				: {'$1', '$2', '$4'}.
+statement -> import_decl : '$1'.
+statement -> package_decl : '$1'.
+statement -> option_decl : '$1'.
+statement -> message_decl : '$1'.
+statement -> service_decl : '$1'.
+statement -> extend_decl : '$1'.
+statement -> enum_decl : '$1'.
 
-g_message -> g_var g_var '{' g_elements '}'			: {'$1', safe_string('$2'), '$4'}.
-g_message -> g_var g_var '{' g_rpcs '}'				: {'$1', safe_string('$2'), '$4'}.
-g_message -> g_var g_var '{' '}'					: {'$1', safe_string('$2'), []}.
+package_decl -> package string ';' : #package{name=unpack('$2'), line=line('$1')}.
 
-g_rpcs -> g_rpc							: ['$1'].
-g_rpcs -> g_rpc g_rpcs						: ['$1' | '$2'].
+option_decl -> strict_option_decl : '$1'.
+%% This is really only necessary for the old-style, but some protos
+%% have it, e.g. syntax = "2"; WTF Google
+option_decl -> identifier '=' optvalue ';':  #option{key=unpack('$1'), value='$3', line=line('$1')}.
 
-g_rpc -> g_var g_var '(' g_var ')' g_var '(' g_var ')' ';'	: {'$1', safe_string('$2'), safe_string('$4'), safe_string('$8')}.
+strict_option_decl -> option identifier '=' optvalue ';': #option{key=unpack('$2'), value='$4', line=line('$1')}.
 
-g_elements -> g_element						: ['$1'].
-g_elements -> g_element g_elements				: ['$1' | '$2'].
+optvalue -> string : unpack('$1').
+optvalue -> integer : unpack('$1').
+optvalue -> float : unpack('$1').
+optvalue -> nested_id : '$1'.
 
-g_element -> g_var g_var g_var '=' integer g_default ';'	: {unwrap('$5'), pack_repeated('$1','$6'), safe_string('$2'), safe_string('$3'), default('$1','$6')}.
-g_element -> g_var '=' integer ';'				: {'$1', unwrap('$3')}.
-g_element -> g_var integer g_var integer ';' 			: {'$1', unwrap('$2'), unwrap('$4')}.
-g_element -> g_var integer g_var g_var ';' 			: {'$1', unwrap('$2'), '$4'}.
-g_element -> g_var g_var '=' g_value ';'			: {'$1', '$2', '$4'}.
-g_element -> g_message						: '$1'.
+import_decl -> import string ';'        : #import{file=unpack('$2'), line=line('$1')}.
+import_decl -> import public string ';' : #import{file=unpack('$3'), public=true, line=line('$1')}.
 
-g_var -> var 							: unwrap('$1').
+message_decl -> message nested_id '{' '}' : #message{name='$2', line=line('$1')}.
+message_decl -> message nested_id '{' message_contents '}' : #message{name='$2', decls='$4', line=line('$1')}.
 
-g_value -> g_var						: '$1'.
-g_value -> integer						: unwrap('$1').
-g_value -> string						: unwrap('$1').
-g_value -> float						: unwrap('$1').
+message_contents -> message_content : ['$1'].
+message_contents -> message_content message_contents : ['$1'|'$2'].
 
-g_default -> '$empty' : none.
-g_default -> '[' g_var '=' g_value ']' 				: {'$2', '$4'}.
+message_content -> field : '$1'.
+message_content -> extension : '$1'.
+message_content -> strict_option_decl : '$1'.
+message_content -> message_decl : '$1'.
+message_content -> enum_decl : '$1'.
+message_content -> extend_decl : '$1'.
+
+extend_decl -> extend nested_id '{' '}' : #extend{name='$2', line=line('$1')}.
+extend_decl -> extend nested_id '{' extend_contents '}' : #extend{name='$2', decls='$4', line=line('$1')}.
+
+extend_contents -> extend_content : ['$1'].
+extend_contents -> extend_content extend_contents : ['$1'|'$2'].
+
+extend_content -> strict_option_decl : '$1'.
+extend_content -> field : '$1'.
+
+service_decl -> service nested_id '{' '}' : #service{name='$2', line=line('$1')}.
+service_decl -> service nested_id '{' service_contents '}' : #service{name='$2', decls='$4', line=line('$1')}.
+
+service_contents -> service_content : ['$1'].
+service_contents -> service_content service_contents : ['$1'|'$2'].
+
+service_content -> rpc_decl : '$1'.
+service_content -> strict_option_decl : '$1'.
+
+rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' '}' : #rpc{call=unpack('$2'), request='$4',
+                                                                                      response='$8', line=line('$1')}.
+rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' rpc_options '}' : #rpc{call=unpack('$2'), request='$4',
+                                                                                                  response='$8', options='$11',
+                                                                                                  line=line('$1')}.
+rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' : #rpc{call=unpack('$2'), request='$4',
+                                                                                      response='$8', line=line('$1')}.
+
+rpc_options -> strict_option_decl : ['$1'].
+rpc_options -> strict_option_decl rpc_options : ['$1'|'$2'].
+
+enum_decl ->  enum nested_id '{' '}' : #enum{name='$2', line=line('$1')}.
+enum_decl ->  enum nested_id '{' enum_contents '}' : #enum{name='$2', decls='$4', line=line('$1')}.
+
+enum_contents -> enum_content enum_contents : ['$1'|'$2'].
+enum_contents -> enum_content : ['$1'].
+
+enum_content -> strict_option_decl : '$1'.
+enum_content -> identifier '=' integer ';' : #enumval{name=unpack('$1'), value=unpack('$3'), line=line('$1')}.
+
+extension -> extensions integer to max ';'     : #extensions{min=unpack('$2'), max=max, line=line('$1')}.
+extension -> extensions integer to integer ';' : #extensions{min=unpack('$2'), max=unpack('$4'), line=line('$1')}.
+
+
+field -> rule field_type identifier '=' integer '[' field_options ']' ';'      : #field{id=unpack('$5'), name=unpack('$3'),
+                                                                                        type='$2', rule=unpack('$1'),
+                                                                                        options='$7', line=line('$1')}.
+
+field -> rule field_type identifier '=' integer '[' ']' ';'      : #field{id=unpack('$5'), name=unpack('$3'),
+                                                                          type='$2', rule=unpack('$1'),
+                                                                          line=line('$1')}.
+
+field -> rule field_type identifier '=' integer ';'      : #field{id=unpack('$5'), name=unpack('$3'),
+                                                                  type='$2', rule=unpack('$1'),
+                                                                  line=line('$1')}.
+
+field_options -> field_option_pair : ['$1'].
+field_options -> field_option_pair ',' field_options : ['$1'|'$2'].
+
+field_option_pair -> identifier '=' optvalue : {unpack('$1'), '$3'}.
+
+%% TODO: figure out wtf they mean with the parens
+%% nested_id -> '(' nested_id ')'        : #id{names=['$2'], line=line('$1')}.
+%% nested_id -> '(' nested_id ')' '.' nested_id  : #id{names=['$2'|('$5')#id.names], line=line('$1')}.
+nested_id -> identifier               : #id{names=[unpack('$1')],
+                                            line=line('$1')}.
+nested_id -> identifier '.' nested_id : #id{names=[unpack('$1')|('$2')#id.names],
+                                            line=line('$1')}.
+
+field_type -> nested_id : '$1'.
+field_type -> type      : unpack('$1').
 
 Erlang code.
-safe_string(A) -> make_safe(atom_to_list(A)).
+-include("epb_ast.hrl").
 
-make_safe(String) ->
-  case erl_scan:reserved_word(list_to_atom(String)) of 
-    true -> "pb_"++String;
-    false -> String
-  end.
+unpack({_,_,V}) -> V.
 
-unwrap({_,_,V}) -> V;
-unwrap({V,_}) -> V.
-
-default(repeated, _) ->
-  [];
-default(_, {default,D}) ->
-  D;
-default(_, _) ->
-  none.
-
-pack_repeated(repeated,{packed,true}) ->
-  repeated_packed;
-pack_repeated(Type,_) ->
-  Type.
+line({_,L,_}) -> L;
+line({_,L}) -> L.

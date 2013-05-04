@@ -1,0 +1,12 @@
+-record(package, {name, line}).
+-record(message, {name, decls=[], line}).
+-record(extend, {name, decls=[], line}).
+-record(enum, {name, decls=[], line}).
+-record(enumval, {name, value, line}).
+-record(service, {name, decls=[], line}).
+-record(option, {key, value, line}).
+-record(import, {file, public=false, line}).
+-record(field, {id, name, type, rule, options=[], line}).
+-record(rpc, {call, request, response, options=[], line}).
+-record(extensions, {min, max, line}).
+-record(id, {names, line}).
