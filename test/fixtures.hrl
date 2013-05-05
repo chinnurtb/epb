@@ -66,7 +66,6 @@
          "../test/fixtures/unittest_import_public_lite.proto",
          "../test/fixtures/unittest_lite.proto",
          "../test/fixtures/unittest_lite_imports_nonlite.proto",
-         "../test/fixtures/unittest_mset.proto",
          "../test/fixtures/unittest_no_generic_services.proto",
          "../test/fixtures/unittest_optimize_for.proto",
          "../test/fixtures/window_manager.proto" ]).
