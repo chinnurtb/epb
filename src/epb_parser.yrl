@@ -8,9 +8,9 @@ Nonterminals
     service_decl service_contents service_content
     extend_decl extend_contents extend_content
     enum_decl enum_contents enum_content
-    field field_type field_options field_option_pair
+    field field_type field_name field_options field_option_pair
     extension
-    nested_id
+    nested_id keyword_as_id
     rpc_decl rpc_options
     .
 
@@ -107,17 +107,20 @@ extension -> extensions integer to max ';'     : #extensions{min=unpack('$2'), m
 extension -> extensions integer to integer ';' : #extensions{min=unpack('$2'), max=unpack('$4'), line=line('$1')}.
 
 
-field -> rule field_type identifier '=' integer '[' field_options ']' ';'      : #field{id=unpack('$5'), name=unpack('$3'),
+field -> rule field_type field_name '=' integer '[' field_options ']' ';'      : #field{id=unpack('$5'), name='$3',
                                                                                         type='$2', rule=unpack('$1'),
                                                                                         options='$7', line=line('$1')}.
 
-field -> rule field_type identifier '=' integer '[' ']' ';'      : #field{id=unpack('$5'), name=unpack('$3'),
+field -> rule field_type field_name '=' integer '[' ']' ';'      : #field{id=unpack('$5'), name='$3',
                                                                           type='$2', rule=unpack('$1'),
                                                                           line=line('$1')}.
 
-field -> rule field_type identifier '=' integer ';'      : #field{id=unpack('$5'), name=unpack('$3'),
+field -> rule field_type field_name '=' integer ';'      : #field{id=unpack('$5'), name='$3',
                                                                   type='$2', rule=unpack('$1'),
                                                                   line=line('$1')}.
+
+field_name -> identifier : unpack('$1').
+field_name -> keyword_as_id : '$1'.
 
 field_options -> field_option_pair : ['$1'].
 field_options -> field_option_pair ',' field_options : ['$1'|'$2'].
@@ -134,6 +137,18 @@ nested_id -> identifier '.' nested_id : #id{names=[unpack('$1')|('$3')#id.names]
 
 field_type -> nested_id : '$1'.
 field_type -> type      : unpack('$1').
+
+keyword_as_id -> message :  atom_to_list(element(1, '$1')).
+keyword_as_id -> enum : atom_to_list(element(1, '$1')).
+keyword_as_id -> service : atom_to_list(element(1, '$1')).
+keyword_as_id -> extend : atom_to_list(element(1, '$1')).
+keyword_as_id -> option : atom_to_list(element(1, '$1')).
+keyword_as_id -> import : atom_to_list(element(1, '$1')).
+keyword_as_id -> package : atom_to_list(element(1, '$1')).
+keyword_as_id -> to : atom_to_list(element(1, '$1')).
+keyword_as_id -> max : atom_to_list(element(1, '$1')).
+keyword_as_id -> rpc : atom_to_list(element(1, '$1')).
+keyword_as_id -> returns : atom_to_list(element(1, '$1')).
 
 Erlang code.
 -include("epb_ast.hrl").
