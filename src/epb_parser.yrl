@@ -88,7 +88,7 @@ rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' '}' :
 rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' rpc_options '}' : #rpc{call=unpack('$2'), request='$4',
                                                                                                   response='$8', options='$11',
                                                                                                   line=line('$1')}.
-rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' : #rpc{call=unpack('$2'), request='$4',
+rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' ';' : #rpc{call=unpack('$2'), request='$4',
                                                                                       response='$8', line=line('$1')}.
 
 rpc_options -> strict_option_decl : ['$1'].
