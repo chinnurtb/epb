@@ -129,7 +129,7 @@ field_option_pair -> identifier '=' optvalue : {unpack('$1'), '$3'}.
 %% nested_id -> '(' nested_id ')' '.' nested_id  : #id{names=['$2'|('$5')#id.names], line=line('$1')}.
 nested_id -> identifier               : #id{names=[unpack('$1')],
                                             line=line('$1')}.
-nested_id -> identifier '.' nested_id : #id{names=[unpack('$1')|('$2')#id.names],
+nested_id -> identifier '.' nested_id : #id{names=[unpack('$1')|('$3')#id.names],
                                             line=line('$1')}.
 
 field_type -> nested_id : '$1'.
