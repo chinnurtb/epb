@@ -35,7 +35,7 @@ statement -> service_decl : '$1'.
 statement -> extend_decl : '$1'.
 statement -> enum_decl : '$1'.
 
-package_decl -> package string ';' : #package{name=unpack('$2'), line=line('$1')}.
+package_decl -> package nested_id ';' : #package{name='$2', line=line('$1')}.
 
 option_decl -> strict_option_decl : '$1'.
 %% This is really only necessary for the old-style, but some protos
