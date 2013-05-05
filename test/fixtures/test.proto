@@ -1,0 +1,72 @@
+// Copyright (c) 2009-2011, Google Inc.
+// All rights reserved.
+
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of Google Inc. nor the names of any other
+//       contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+
+// THIS SOFTWARE IS PROVIDED BY GOOGLE INC. ``AS IS'' AND ANY EXPRESS OR IMPLIED
+// WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+// EVENT SHALL GOOGLE INC. BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+// IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+
+// A series of messages with various kinds of cycles in them.
+//      +-+---+    +---+    +---+
+//      V |   |    V   |    V   |
+// A -> B-+-> C -> D---+--->E---+
+// ^          |`---|--------^
+// +----------+----+        F
+
+message A {
+  optional B b = 1;
+}
+
+message B {
+  optional B b = 1;
+  optional C c = 2;
+}
+
+message C {
+  optional A a = 1;
+  optional B b = 2;
+  optional D d = 3;
+  optional E e = 4;
+}
+
+message D {
+  optional A a = 1;
+  optional D d = 2;
+  optional E e = 3;
+}
+
+message E {
+  optional E e = 1;
+}
+
+message F {
+  optional E e = 1;
+}
+
+// A proto with a bunch of simple primitives.
+message SimplePrimitives {
+  optional fixed64 a = 1;
+  optional fixed32 b = 2;
+  optional double c = 3;
+  optional float d = 5;
+  //optional sint64 e = 6;
+  //optional sint32 f = 7;
+}
