@@ -1,0 +1,40 @@
+package resources.generated;
+
+option java_outer_classname = "EnumTest";
+
+enum ComputerPeripherals {
+	MOUSE = 1;
+	KEYBOARD = 2;
+}
+
+message Outer {
+	enum Inner {
+		FIRST = 1;
+		SECOND = 2;
+	}
+	required Inner inner_required = 1;
+	optional Inner inner_optional = 2 [default = FIRST];
+	repeated Inner inner_repeated = 3;
+}
+
+message OuterDuplicate {
+	enum Inner {
+		FIRST = 1;
+		SECOND = 2;
+	}
+	required Inner inner_required = 1;
+	optional Inner inner_optional = 2 [default = SECOND];
+	repeated Inner inner_repeated = 3;
+}
+
+message OuterEnumContainer {
+  message InnerEnumContainer {
+    enum SomeEnum {
+      VALUE_1 = 0;
+      VALUE_2 = 1;
+      VALUE_3 = 2;
+    }
+    required SomeEnum some_enum = 1;
+  }
+  required InnerEnumContainer inner_message = 1;
+}
