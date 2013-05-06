@@ -40,9 +40,9 @@ package_decl -> package nested_id ';' : #package{name='$2', line=line('$1')}.
 option_decl -> strict_option_decl : '$1'.
 %% This is really only necessary for the old-style, but some protos
 %% have it, e.g. syntax = "2"; WTF Google
-option_decl -> identifier '=' optvalue ';':  #option{key=unpack('$1'), value='$3', line=line('$1')}.
+option_decl -> nested_id '=' optvalue ';':  #option{key='$1', value='$3', line=line('$1')}.
 
-strict_option_decl -> option identifier '=' optvalue ';': #option{key=unpack('$2'), value='$4', line=line('$1')}.
+strict_option_decl -> option nested_id '=' optvalue ';': #option{key=unpack('$2'), value='$4', line=line('$1')}.
 
 optvalue -> string : unpack('$1').
 optvalue -> integer : unpack('$1').
@@ -127,13 +127,11 @@ field_options -> field_option_pair ',' field_options : ['$1'|'$2'].
 
 field_option_pair -> identifier '=' optvalue : {unpack('$1'), '$3'}.
 
-%% TODO: figure out wtf they mean with the parens
-%% nested_id -> '(' nested_id ')'        : #id{names=['$2'], line=line('$1')}.
-%% nested_id -> '(' nested_id ')' '.' nested_id  : #id{names=['$2'|('$5')#id.names], line=line('$1')}.
-nested_id -> identifier               : #id{names=[unpack('$1')],
-                                            line=line('$1')}.
-nested_id -> identifier '.' nested_id : #id{names=[unpack('$1')|('$3')#id.names],
-                                            line=line('$1')}.
+nested_id -> '(' nested_id ')'                : #id{names=['$2'], line=line('$1')}.
+nested_id -> '(' nested_id ')' '.' nested_id  : #id{names=['$2'|('$5')#id.names], line=line('$1')}.
+nested_id -> identifier                       : #id{names=[unpack('$1')], line=line('$1')}.
+nested_id -> identifier '.' nested_id         : #id{names=[unpack('$1')|('$3')#id.names],
+                                                    line=line('$1')}.
 
 field_type -> nested_id : '$1'.
 field_type -> type      : unpack('$1').
