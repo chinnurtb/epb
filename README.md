@@ -1,7 +1,7 @@
 # epb
 
 Erlang protocol buffers library. This is born out of rage against
-[erlang_protobuffs](/basho/erlang_protobuffs), which uses a (working
+[erlang_protobuffs](//github.com/basho/erlang_protobuffs), which uses a (working
 but brain-dead) compilation strategy that is brittle and hard to
 evolve. The project also has lots of technical debt from lack of
 vision and inconsistency of multiple authors adding new features.
