@@ -147,6 +147,9 @@ keyword_as_id -> to : atom_to_list(element(1, '$1')).
 keyword_as_id -> max : atom_to_list(element(1, '$1')).
 keyword_as_id -> rpc : atom_to_list(element(1, '$1')).
 keyword_as_id -> returns : atom_to_list(element(1, '$1')).
+keyword_as_id -> extensions : atom_to_list(element(1, '$1')).
+keyword_as_id -> type : unpack('$1').
+keyword_as_id -> rule : unpack('$1').
 
 Erlang code.
 -include("epb_ast.hrl").
