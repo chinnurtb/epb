@@ -45,7 +45,7 @@ option_decl -> strict_option_decl : '$1'.
 %% have it, e.g. syntax = "2"; WTF Google
 option_decl -> nested_id '=' optvalue ';':  #option{key='$1', value='$3', line=line('$1')}.
 
-strict_option_decl -> option nested_id '=' optvalue ';': #option{key=unpack('$2'), value='$4', line=line('$1')}.
+strict_option_decl -> option nested_id '=' optvalue ';': #option{key='$2', value='$4', line=line('$1')}.
 
 optvalue -> string : unpack('$1').
 optvalue -> integer : unpack('$1').
