@@ -1,6 +1,6 @@
 Nonterminals
     protobuf
-    statement
+    statements statement
     import_decl
     package_decl
     option_decl strict_option_decl optvalue
@@ -24,8 +24,11 @@ Terminals
 
 Rootsymbol protobuf.
 
-protobuf -> statement : ['$1'].
-protobuf -> statement protobuf : ['$1'|'$2'].
+protobuf -> '$empty' : [].
+protobuf -> statements : '$1'.
+
+statements -> statement : ['$1'].
+statements -> statement statements : ['$1'|'$2'].
 
 statement -> import_decl : '$1'.
 statement -> package_decl : '$1'.
