@@ -54,7 +54,7 @@
          "../test/fixtures/test_decoder_schema.proto",
          "../test/fixtures/ums.proto",
          "../test/fixtures/unittest.proto",
-%%         "../test/fixtures/unittest_custom_options.proto",
+         "../test/fixtures/unittest_custom_options.proto",
          "../test/fixtures/unittest_embed_optimize_for.proto",
          "../test/fixtures/unittest_empty.proto",
          "../test/fixtures/unittest_enormous_descriptor.proto",
