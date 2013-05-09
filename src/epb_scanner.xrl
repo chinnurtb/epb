@@ -26,8 +26,8 @@ Rules.
 {SIGN}?{DIGIT}+{FLOAT}                                     : {token, {float, TokenLine, float(list_to_integer(trim_float_sentinel(TokenChars)))}}.
 {SIGN}?{DIGIT}+([eE]{SIGN}?{DIGIT}+){FLOAT}?               : {token, {float, TokenLine, parse_exp_number(TokenChars)}}.
 {SIGN}?{DIGIT}+\.{DIGIT}+?([eE]{SIGN}?{DIGIT}+)?{FLOAT}?   : {token, {float, TokenLine, parse_float(TokenChars)}}.
-0x{HEX_DIGIT}+                                             : {token, {integer, TokenLine, hex_to_int(TokenChars)}}.
-0{OCTAL_DIGIT}+                                            : {token, {integer, TokenLine, oct_to_int(TokenChars)}}.
+{SIGN}?0x{HEX_DIGIT}+                                      : {token, {integer, TokenLine, hex_to_int(TokenChars)}}.
+{SIGN}?0{OCTAL_DIGIT}+                                     : {token, {integer, TokenLine, oct_to_int(TokenChars)}}.
 (0|{SIGN}?[1-9]{DIGIT}*)                                   : {token, {integer, TokenLine, list_to_integer(TokenChars)}}.
 {SYMBOL}                                                   : {token, {list_to_atom(TokenChars), TokenLine}}.
 
@@ -86,10 +86,18 @@ unescape([$\\, C|Rest], Acc) ->
 unescape([C|Rest], Acc) ->
     unescape(Rest, [C|Acc]).
 
+hex_to_int([$+|Hex]) ->
+    hex_to_int(Hex);
+hex_to_int([$-|Hex]) ->
+    hex_to_int(Hex);
 hex_to_int("0x"++Hex) ->
     list_to_integer(Hex, 16).
 
-oct_to_int("0"++Oct) ->
+oct_to_int([$+|Oct]) ->
+    oct_to_int(Oct);
+oct_to_int([$-|Oct]) ->
+    oct_to_int(Oct);
+oct_to_int([$0|Oct]) ->
     list_to_integer(Oct, 8).
 
 parse_exp_number(Chars) ->
