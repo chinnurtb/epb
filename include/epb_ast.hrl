@@ -6,6 +6,7 @@
 -record(service, {name, decls=[], line}).
 -record(option, {key, value, line}).
 -record(import, {file, public=false, line}).
+-record(group, {id, name, decls, rule, line}).
 -record(field, {id, name, type, rule, options=[], line}).
 -record(rpc, {call, request, response, options=[], line}).
 -record(extensions, {min, max, line}).

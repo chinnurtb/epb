@@ -45,7 +45,7 @@ Erlang code.
 %% Other keywords
 -define(KEYWORD, ["message", "enum", "service", "extend", "option", "import",
                   "package", "public", "extensions", "to", "max", "rpc",
-                  "returns"]).
+                  "returns", "group"]).
 
 -export([file/1, main/1]).
 

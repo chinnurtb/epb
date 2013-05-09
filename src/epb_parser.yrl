@@ -9,9 +9,11 @@ Nonterminals
     extend_decl extend_contents extend_content
     enum_decl enum_contents enum_content
     field field_type field_name field_options field_option_pair
+    group_decl group_contents
     extension
     nested_id keyword_as_id
     rpc_decl rpc_options
+    end_block
     .
 
 Terminals
@@ -19,7 +21,7 @@ Terminals
     message enum service extend
     option import package
     identifier type rule
-    public extensions to max rpc returns
+    public extensions to max rpc returns group
     string float integer.
 
 Rootsymbol protobuf.
@@ -55,12 +57,13 @@ optvalue -> nested_id : '$1'.
 import_decl -> import string ';'        : #import{file=unpack('$2'), line=line('$1')}.
 import_decl -> import public string ';' : #import{file=unpack('$3'), public=true, line=line('$1')}.
 
-message_decl -> message nested_id '{' '}' : #message{name='$2', line=line('$1')}.
-message_decl -> message nested_id '{' message_contents '}' : #message{name='$2', decls='$4', line=line('$1')}.
+message_decl -> message nested_id '{' end_block : #message{name='$2', line=line('$1')}.
+message_decl -> message nested_id '{' message_contents end_block : #message{name='$2', decls='$4', line=line('$1')}.
 
 message_contents -> message_content : ['$1'].
 message_contents -> message_content message_contents : ['$1'|'$2'].
 
+message_content -> group_decl : '$1'.
 message_content -> field : '$1'.
 message_content -> extension : '$1'.
 message_content -> strict_option_decl : '$1'.
@@ -68,17 +71,18 @@ message_content -> message_decl : '$1'.
 message_content -> enum_decl : '$1'.
 message_content -> extend_decl : '$1'.
 
-extend_decl -> extend nested_id '{' '}' : #extend{name='$2', line=line('$1')}.
-extend_decl -> extend nested_id '{' extend_contents '}' : #extend{name='$2', decls='$4', line=line('$1')}.
+extend_decl -> extend nested_id '{' end_block : #extend{name='$2', line=line('$1')}.
+extend_decl -> extend nested_id '{' extend_contents end_block : #extend{name='$2', decls='$4', line=line('$1')}.
 
 extend_contents -> extend_content : ['$1'].
 extend_contents -> extend_content extend_contents : ['$1'|'$2'].
 
+extend_content -> group_decl : '$1'.
 extend_content -> strict_option_decl : '$1'.
 extend_content -> field : '$1'.
 
-service_decl -> service nested_id '{' '}' : #service{name='$2', line=line('$1')}.
-service_decl -> service nested_id '{' service_contents '}' : #service{name='$2', decls='$4', line=line('$1')}.
+service_decl -> service nested_id '{' end_block : #service{name='$2', line=line('$1')}.
+service_decl -> service nested_id '{' service_contents end_block : #service{name='$2', decls='$4', line=line('$1')}.
 
 service_contents -> service_content : ['$1'].
 service_contents -> service_content service_contents : ['$1'|'$2'].
@@ -86,9 +90,9 @@ service_contents -> service_content service_contents : ['$1'|'$2'].
 service_content -> rpc_decl : '$1'.
 service_content -> strict_option_decl : '$1'.
 
-rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' '}' : #rpc{call=unpack('$2'), request='$4',
+rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' end_block : #rpc{call=unpack('$2'), request='$4',
                                                                                       response='$8', line=line('$1')}.
-rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' rpc_options '}' : #rpc{call=unpack('$2'), request='$4',
+rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' '{' rpc_options end_block : #rpc{call=unpack('$2'), request='$4',
                                                                                                   response='$8', options='$11',
                                                                                                   line=line('$1')}.
 rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' ';' : #rpc{call=unpack('$2'), request='$4',
@@ -97,8 +101,8 @@ rpc_decl -> rpc identifier '(' nested_id ')' returns '(' nested_id ')' ';' : #rp
 rpc_options -> strict_option_decl : ['$1'].
 rpc_options -> strict_option_decl rpc_options : ['$1'|'$2'].
 
-enum_decl ->  enum nested_id '{' '}' : #enum{name='$2', line=line('$1')}.
-enum_decl ->  enum nested_id '{' enum_contents '}' : #enum{name='$2', decls='$4', line=line('$1')}.
+enum_decl ->  enum nested_id '{' end_block : #enum{name='$2', line=line('$1')}.
+enum_decl ->  enum nested_id '{' enum_contents end_block : #enum{name='$2', decls='$4', line=line('$1')}.
 
 enum_contents -> enum_content enum_contents : ['$1'|'$2'].
 enum_contents -> enum_content : ['$1'].
@@ -109,6 +113,11 @@ enum_content -> identifier '=' integer ';' : #enumval{name=unpack('$1'), value=u
 extension -> extensions integer to max ';'     : #extensions{min=unpack('$2'), max=max, line=line('$1')}.
 extension -> extensions integer to integer ';' : #extensions{min=unpack('$2'), max=unpack('$4'), line=line('$1')}.
 
+group_decl -> rule group field_name '=' integer '{' end_block : #group{id=unpack('$5'), name='$3', rule=unpack('$1'), line=line('$1')}.
+group_decl -> rule group field_name '=' integer '{' group_contents end_block : #group{id=unpack('$5'), name='$3', rule=unpack('$1'), decls='$7', line=line('$1')}.
+
+group_contents -> field : '$1'.
+group_contents -> field group_contents : '$2'.
 
 field -> rule field_type field_name '=' integer '[' field_options ']' ';'      : #field{id=unpack('$5'), name='$3',
                                                                                         type='$2', rule=unpack('$1'),
@@ -153,6 +162,11 @@ keyword_as_id -> returns : atom_to_list(element(1, '$1')).
 keyword_as_id -> extensions : atom_to_list(element(1, '$1')).
 keyword_as_id -> type : unpack('$1').
 keyword_as_id -> rule : unpack('$1').
+
+%% Some google .protos (e.g. descriptor.proto) allow a semicolon after
+%% a block statement, especially when declaring enums.
+end_block -> '}' : '$1'.
+end_block -> '}' ';' : '$1'.
 
 Erlang code.
 -include("epb_ast.hrl").

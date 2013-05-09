@@ -55,6 +55,7 @@ prop_parse() ->
 ?LITERAL('max').
 ?LITERAL('rpc').
 ?LITERAL('returns').
+?LITERAL('group').
 
 '$empty'() -> [].
 
