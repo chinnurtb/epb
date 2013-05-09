@@ -23,6 +23,7 @@ Rules.
 /\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/                  : skip_token.  %% C-style block comments
 {LETTER}{ALNUM}*                                           : {token, select_id_type(TokenChars, TokenLine)}.
 \"([^\"]|\\\")*\"                                          : {token, {string, TokenLine, unquote(TokenChars)}}.
+{SIGN}?(inf|nan)                                           : {token, {float, TokenLine, special_float(TokenChars)}}.
 {SIGN}?{DIGIT}+{FLOAT}                                     : {token, {float, TokenLine, float(list_to_integer(trim_float_sentinel(TokenChars)))}}.
 {SIGN}?{DIGIT}+([eE]{SIGN}?{DIGIT}+){FLOAT}?               : {token, {float, TokenLine, parse_exp_number(TokenChars)}}.
 {SIGN}?{DIGIT}+\.{DIGIT}+?([eE]{SIGN}?{DIGIT}+)?{FLOAT}?   : {token, {float, TokenLine, parse_float(TokenChars)}}.
@@ -108,6 +109,13 @@ parse_exp_number(Chars) ->
         false ->
             parse_float(re:replace(Chars, "[eE]", ".0&", [{return, list}]))
     end.
+
+special_float("-inf") -> '-infinity';
+special_float("+inf") -> infinity;
+special_float("inf") -> infinity; 
+special_float("-nan") -> nan;
+special_float("+nan") -> nan;
+special_float("nan") -> nan.
 
 parse_float(Float) ->
     list_to_float(trim_float_sentinel(Float)).
