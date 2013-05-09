@@ -110,6 +110,7 @@ enum_contents -> enum_content : ['$1'].
 enum_content -> strict_option_decl : '$1'.
 enum_content -> identifier '=' integer ';' : #enumval{name=unpack('$1'), value=unpack('$3'), line=line('$1')}.
 
+extension -> extensions integer ';' : #extensions{min=unpack('$2'), max=unpack('$2'), line=line('$1')}.
 extension -> extensions integer to max ';'     : #extensions{min=unpack('$2'), max=max, line=line('$1')}.
 extension -> extensions integer to integer ';' : #extensions{min=unpack('$2'), max=unpack('$4'), line=line('$1')}.
 
