@@ -18,8 +18,8 @@ Rules.
 
 {UNPRINTABLE}+                                          : skip_token.  %% remove unprintables
 {WS}+                                                   : skip_token.  %% remove whitespace
-#.*{EOL}+                                               : skip_token.  %% sh-style comments
-//.*{EOL}+                                              : skip_token.  %% C style single-line comments
+#.*({EOL}+|)                                            : skip_token.  %% sh-style comments
+//.*({EOL}+|)                                           : skip_token.  %% C style single-line comments
 /\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/               : skip_token.  %% C-style block comments
 {LETTER}{ALNUM}*                                        : {token, select_id_type(TokenChars, TokenLine)}.
 \"([^\"]|\\\")*\"                                       : {token, {string, TokenLine, unquote(TokenChars)}}.
@@ -45,6 +45,8 @@ Erlang code.
 -define(KEYWORD, ["message", "enum", "service", "extend", "option", "import",
                   "package", "public", "extensions", "to", "max", "rpc",
                   "returns"]).
+
+-export([file/1, main/1]).
 
 %% Flip through the reserved words and create tokens of the proper type.
 select_id_type(T, Line) ->
@@ -95,3 +97,10 @@ parse_float(Float0) ->
                 _ -> Float0
             end,
     list_to_float(Float).
+
+file(Filename) ->
+    {ok, Bin} = file:read_file(Filename),
+    string(unicode:characters_to_list(Bin)).
+
+main([Filename]) ->
+    io:format("~p~n", [file(Filename)]).

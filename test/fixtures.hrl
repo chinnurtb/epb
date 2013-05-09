@@ -1,4 +1,8 @@
--define(FIXTURES,
+-define(FAILING_FIXTURES, [
+         "../test/fixtures/invalidComplex.proto",
+         "../test/fixtures/invalidMessage.proto",
+         "../test/fixtures/invalidSimple.proto"]).
+-define(PASSING_FIXTURES,         
         [
          "../test/fixtures/RemoteProtocol.proto",
          "../test/fixtures/addressbook.proto",
@@ -24,9 +28,6 @@
          "../test/fixtures/groups.proto",
          "../test/fixtures/http_logger.proto",
          "../test/fixtures/imports.proto",
-         "../test/fixtures/invalidComplex.proto",
-         "../test/fixtures/invalidMessage.proto",
-         "../test/fixtures/invalidSimple.proto",
          "../test/fixtures/launcher.proto",
          "../test/fixtures/message.proto",
          "../test/fixtures/more_extensions.proto",
@@ -66,3 +67,5 @@
          "../test/fixtures/unittest_no_generic_services.proto",
          "../test/fixtures/unittest_optimize_for.proto",
          "../test/fixtures/window_manager.proto" ]).
+
+-define(FIXTURES, ?PASSING_FIXTURES  ++ ?FAILING_FIXTURES).
