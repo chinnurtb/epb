@@ -16,19 +16,20 @@ FLOAT = [fF]
 
 Rules.
 
-{UNPRINTABLE}+                                          : skip_token.  %% remove unprintables
-{WS}+                                                   : skip_token.  %% remove whitespace
-#.*({EOL}+|)                                            : skip_token.  %% sh-style comments
-//.*({EOL}+|)                                           : skip_token.  %% C style single-line comments
-/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/               : skip_token.  %% C-style block comments
-{LETTER}{ALNUM}*                                        : {token, select_id_type(TokenChars, TokenLine)}.
-\"([^\"]|\\\")*\"                                       : {token, {string, TokenLine, unquote(TokenChars)}}.
-{SIGN}?{DIGIT}+([eE]{SIGN}?{DIGIT}+)?{FLOAT}            : {token, {float, TokenLine, parse_float(TokenChars)}}.
-{SIGN}?{DIGIT}+\.{DIGIT}+([eE]{SIGN}?{DIGIT}+)?{FLOAT}? : {token, {float, TokenLine, parse_float(TokenChars)}}.
-0x{HEX_DIGIT}+                                          : {token, {integer, TokenLine, hex_to_int(TokenChars)}}.
-0{OCTAL_DIGIT}+                                         : {token, {integer, TokenLine, oct_to_int(TokenChars)}}.
-(0|{SIGN}?[1-9]{DIGIT}*)                                : {token, {integer, TokenLine, list_to_integer(TokenChars)}}.
-{SYMBOL}                                                : {token, {list_to_atom(TokenChars), TokenLine}}.
+{UNPRINTABLE}+                                             : skip_token.  %% remove unprintables
+{WS}+                                                      : skip_token.  %% remove whitespace
+#.*({EOL}+|)                                               : skip_token.  %% sh-style comments
+//.*({EOL}+|)                                              : skip_token.  %% C style single-line comments
+/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/                  : skip_token.  %% C-style block comments
+{LETTER}{ALNUM}*                                           : {token, select_id_type(TokenChars, TokenLine)}.
+\"([^\"]|\\\")*\"                                          : {token, {string, TokenLine, unquote(TokenChars)}}.
+{SIGN}?{DIGIT}+{FLOAT}                                     : {token, {float, TokenLine, float(list_to_integer(trim_float_sentinel(TokenChars)))}}.
+{SIGN}?{DIGIT}+([eE]{SIGN}?{DIGIT}+){FLOAT}?               : {token, {float, TokenLine, parse_exp_number(TokenChars)}}.
+{SIGN}?{DIGIT}+\.{DIGIT}+?([eE]{SIGN}?{DIGIT}+)?{FLOAT}?   : {token, {float, TokenLine, parse_float(TokenChars)}}.
+0x{HEX_DIGIT}+                                             : {token, {integer, TokenLine, hex_to_int(TokenChars)}}.
+0{OCTAL_DIGIT}+                                            : {token, {integer, TokenLine, oct_to_int(TokenChars)}}.
+(0|{SIGN}?[1-9]{DIGIT}*)                                   : {token, {integer, TokenLine, list_to_integer(TokenChars)}}.
+{SYMBOL}                                                   : {token, {list_to_atom(TokenChars), TokenLine}}.
 
 Erlang code.
 
@@ -91,12 +92,23 @@ hex_to_int("0x"++Hex) ->
 oct_to_int("0"++Oct) ->
     list_to_integer(Oct, 8).
 
-parse_float(Float0) ->
-    Float = case lists:last(Float0) of
-                F when F == $f orelse F == $F -> lists:sublist(Float0, 0, length(Float0) - 1);
-                _ -> Float0
-            end,
-    list_to_float(Float).
+parse_exp_number(Chars) ->
+    %% 52e5 is used in one google example
+    case lists:member($., Chars) of
+        true ->
+            parse_float(Chars);
+        false ->
+            parse_float(re:replace(Chars, "[eE]", ".0&", [{return, list}]))
+    end.
+
+parse_float(Float) ->
+    list_to_float(trim_float_sentinel(Float)).
+
+trim_float_sentinel(Float0) ->
+    case lists:last(Float0) of
+        F when F == $f orelse F == $F -> lists:sublist(Float0, 0, length(Float0) - 1);
+        _ -> Float0
+    end.
 
 file(Filename) ->
     {ok, Bin} = file:read_file(Filename),
