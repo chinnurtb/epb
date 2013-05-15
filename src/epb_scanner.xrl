@@ -10,7 +10,7 @@ HEX_DIGIT = [0-9a-fA-F]
 LETTER = [a-zA-Z_]
 ALNUM = [a-zA-Z0-9_]
 ESCAPE = [abfnrtv\\\?\'\"]
-SYMBOL = ([=,;{}\[\]()./-]|\+)
+SYMBOL = ([=,\:;{}\[\]()./-]|\+)
 SIGN = (-|\+)
 FLOAT = [fF]
 
@@ -23,6 +23,7 @@ Rules.
 /\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/                  : skip_token.  %% C-style block comments
 {LETTER}{ALNUM}*                                           : {token, select_id_type(TokenChars, TokenLine)}.
 \"([^\"]|\\\")*\"                                          : {token, {string, TokenLine, unquote(TokenChars)}}.
+\'([^\']|\\\')*\'                                          : {token, {string, TokenLine, unquote(TokenChars)}}.
 {SIGN}?(inf|nan)                                           : {token, {float, TokenLine, special_float(TokenChars)}}.
 {SIGN}?{DIGIT}+{FLOAT}                                     : {token, {float, TokenLine, float(list_to_integer(trim_float_sentinel(TokenChars)))}}.
 {SIGN}?{DIGIT}+([eE]{SIGN}?{DIGIT}+){FLOAT}?               : {token, {float, TokenLine, parse_exp_number(TokenChars)}}.

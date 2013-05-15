@@ -2,7 +2,7 @@
 -record(message, {name, decls=[], line}).
 -record(extend, {name, decls=[], line}).
 -record(enum, {name, decls=[], line}).
--record(enumval, {name, value, line}).
+-record(enumval, {name, value, options, line}).
 -record(service, {name, decls=[], line}).
 -record(option, {key, value, line}).
 -record(import, {file, public=false, line}).
@@ -11,3 +11,5 @@
 -record(rpc, {call, request, response, options=[], line}).
 -record(extensions, {min, max, line}).
 -record(id, {names, line}).
+-record(message_literal, {fields, extend, line}).
+-record(field_literal, {name, value, line}).

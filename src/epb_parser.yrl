@@ -13,11 +13,12 @@ Nonterminals
     extension
     nested_id keyword_as_id
     rpc_decl rpc_options
+    message_literal message_literal_fields field_literal field_literal_value
     end_block
     .
 
 Terminals
-    ';' '=' '{' '}' '[' ']' '(' ')' '.' ','
+    ';' ':' '=' '{' '}' '[' ']' '(' ')' '.' ','
     message enum service extend
     option import package
     identifier type rule
@@ -49,6 +50,7 @@ option_decl -> nested_id '=' optvalue ';':  #option{key='$1', value='$3', line=l
 
 strict_option_decl -> option nested_id '=' optvalue ';': #option{key='$2', value='$4', line=line('$1')}.
 
+optvalue -> message_literal: '$1'.
 optvalue -> string : unpack('$1').
 optvalue -> integer : unpack('$1').
 optvalue -> float : unpack('$1').
@@ -109,6 +111,8 @@ enum_contents -> enum_content : ['$1'].
 
 enum_content -> strict_option_decl : '$1'.
 enum_content -> identifier '=' integer ';' : #enumval{name=unpack('$1'), value=unpack('$3'), line=line('$1')}.
+enum_content -> identifier '=' integer '[' ']' ';' : #enumval{name=unpack('$1'), value=unpack('$3'), line=line('$1')}.
+enum_content -> identifier '=' integer '[' field_options ']' ';' : #enumval{name=unpack('$1'), value=unpack('$3'), options='$5', line=line('$1')}.
 
 extension -> extensions integer ';' : #extensions{min=unpack('$2'), max=unpack('$2'), line=line('$1')}.
 extension -> extensions integer to max ';'     : #extensions{min=unpack('$2'), max=max, line=line('$1')}.
@@ -139,12 +143,30 @@ field_options -> field_option_pair : ['$1'].
 field_options -> field_option_pair ',' field_options : ['$1'|'$2'].
 
 field_option_pair -> identifier '=' optvalue : {unpack('$1'), '$3'}.
+field_option_pair -> '(' identifier ')' '=' optvalue : {unpack('$2'), '$3'}.
 
-nested_id -> '(' nested_id ')'                : #id{names=['$2'], line=line('$1')}.
-nested_id -> '(' nested_id ')' '.' nested_id  : #id{names=['$2'|('$5')#id.names], line=line('$1')}.
+nested_id -> '.' nested_id                    : ('$2')#id{line=line('$1')}.
+nested_id -> '(' nested_id ')'                : ('$2')#id{line=line('$1')}.
+nested_id -> '(' nested_id ')' '.' nested_id  : #id{names=('$2')#id.names ++ ('$5')#id.names, line=line('$1')}.
 nested_id -> identifier                       : #id{names=[unpack('$1')], line=line('$1')}.
 nested_id -> identifier '.' nested_id         : #id{names=[unpack('$1')|('$3')#id.names],
                                                     line=line('$1')}.
+
+message_literal -> '[' nested_id ']' '{' '}' : #message_literal{fields=[], extend='$2', line=line('$1')}.
+message_literal -> '[' nested_id ']' '{' message_literal_fields '}' : #message_literal{fields='$5', extend='$2', line=line('$1')}.
+message_literal -> '{' '}' : #message_literal{fields=[], line=line('$1')}.
+message_literal -> '{' message_literal_fields '}' : #message_literal{fields='$2', line=line('$1')}.
+
+message_literal_fields -> field_literal : '$1'.
+message_literal_fields -> field_literal message_literal_fields : ['$1'|'$2'].
+
+field_literal -> identifier message_literal : #field_literal{name=unpack('$1'), value='$2', line=line('$1')}.
+field_literal -> identifier ':' field_literal_value : #field_literal{name=unpack('$1'), value='$3', line=line('$1')}.
+
+field_literal_value -> string : unpack('$1').
+field_literal_value -> integer : unpack('$1').
+field_literal_value -> float : unpack('$1').
+
 
 field_type -> nested_id : '$1'.
 field_type -> type      : unpack('$1').
@@ -161,8 +183,8 @@ keyword_as_id -> max : atom_to_list(element(1, '$1')).
 keyword_as_id -> rpc : atom_to_list(element(1, '$1')).
 keyword_as_id -> returns : atom_to_list(element(1, '$1')).
 keyword_as_id -> extensions : atom_to_list(element(1, '$1')).
-keyword_as_id -> type : unpack('$1').
-keyword_as_id -> rule : unpack('$1').
+keyword_as_id -> type : atom_to_list(unpack('$1')).
+keyword_as_id -> rule : atom_to_list(unpack('$1')).
 
 %% Some google .protos (e.g. descriptor.proto) allow a semicolon after
 %% a block statement, especially when declaring enums.
