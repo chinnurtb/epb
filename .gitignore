@@ -11,3 +11,5 @@ src/epb_parser.erl
 src/epb_scanner.erl
 erl_crash.dump
 .DS_Store
+/.eqc-info
+/current_counterexample.eqc

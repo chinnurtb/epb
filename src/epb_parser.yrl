@@ -193,8 +193,16 @@ end_block -> '}' ';' : '$1'.
 
 Erlang code.
 -include("epb_ast.hrl").
+-export([file/1]).
 
 unpack({_,_,V}) -> V.
 
 line({_,L,_}) -> L;
 line({_,L}) -> L.
+
+file(Filename) ->
+    case epb_scanner:file(Filename) of
+        {ok, Toks, _} ->
+            parse(Toks);
+        Other -> Other
+    end.
