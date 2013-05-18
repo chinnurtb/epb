@@ -49,6 +49,11 @@ Erlang code.
                   "package", "public", "extensions", "to", "max", "rpc",
                   "returns", "group"]).
 
+-define(OCT(C), C >= $0, C =< $7).
+-define(HEX(C), C >= $0 andalso C =< $9 orelse
+                C >= $A andalso C =< $F orelse
+                C >= $a andalso C =< $f).
+
 -export([file/1, main/1]).
 
 %% Flip through the reserved words and create tokens of the proper type.
@@ -83,10 +88,28 @@ unquote(Str) ->
 
 unescape([], Acc) ->
     lists:reverse(Acc);
-unescape([$\\, C|Rest], Acc) ->
-    unescape(Rest, [C|Acc]);
+unescape([$\\|Rest0], Acc) ->
+    {Char, Rest} = unescape_char(Rest0),
+    unescape(Rest, [Char|Acc]);
 unescape([C|Rest], Acc) ->
     unescape(Rest, [C|Acc]).
+
+unescape_char([O1,O2,O3|T]) when ?OCT(O1), ?OCT(O2), ?OCT(O3) ->
+    {(O1 * 8 + O2)*8 + O3 - 73*$0, T};
+unescape_char([O1, O2|T]) when ?OCT(O1), ?OCT(O2) ->
+    {(O1 * 8) + O2 - 9*$0, T};
+unescape_char([$x,H0,H1|T]) when ?HEX(H0), ?HEX(H1)->
+    {list_to_integer([H0,H1], 16), T};
+unescape_char([$n|T]) -> {$\n, T};
+unescape_char([$r|T]) -> {$\r, T};
+unescape_char([$t|T]) -> {$\t, T};
+unescape_char([$v|T]) -> {$\v, T};
+unescape_char([$b|T]) -> {$\b, T};
+unescape_char([$f|T]) -> {$\f, T};
+unescape_char([$e|T]) -> {$\e, T};
+unescape_char([$s|T]) -> {$\s, T};
+unescape_char([$d|T]) -> {$\d, T};
+unescape_char([C|T]) ->  {C, T}.
 
 hex_to_int([$+|Hex]) ->
     hex_to_int(Hex);
@@ -102,6 +125,7 @@ oct_to_int([$-|Oct]) ->
 oct_to_int([$0|Oct]) ->
     list_to_integer(Oct, 8).
 
+-spec parse_exp_number(string()) -> float().
 parse_exp_number(Chars) ->
     %% 52e5 is used in one google example
     case lists:member($., Chars) of
@@ -113,7 +137,7 @@ parse_exp_number(Chars) ->
 
 special_float("-inf") -> '-infinity';
 special_float("+inf") -> infinity;
-special_float("inf") -> infinity; 
+special_float("inf") -> infinity;
 special_float("-nan") -> nan;
 special_float("+nan") -> nan;
 special_float("nan") -> nan.
@@ -121,11 +145,12 @@ special_float("nan") -> nan.
 parse_float(Float) ->
     list_to_float(trim_float_sentinel(Float)).
 
-trim_float_sentinel(Float0) ->
-    case lists:last(Float0) of
-        F when F == $f orelse F == $F -> lists:sublist(Float0, 0, length(Float0) - 1);
-        _ -> Float0
-    end.
+trim_float_sentinel(L) ->
+    lists:reverse(trim_float_sentinel0(lists:reverse(L))).
+
+trim_float_sentinel0([$f|T]) -> T;
+trim_float_sentinel0([$F|T]) -> T;
+trim_float_sentinel0(L) -> L.
 
 file(Filename) ->
     {ok, Bin} = file:read_file(Filename),
