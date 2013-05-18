@@ -16,6 +16,9 @@
 
 -define(RULE, ["required", "optional", "repeated"]).
 
+%%===============================
+%% PROPERTIES
+%%===============================
 prop_parse() ->
     ?FORALL(SymbolicExpr,'protobuf'(),
  	    begin
@@ -24,7 +27,7 @@ prop_parse() ->
                               ?debugFmt("Tokens: ~p~n", [Tokens])
                           end,
                           case epb_parser:parse(Tokens) of
-                              {ok, SyntaxTree} -> true;
+                              {ok, _SyntaxTree} -> true;
                               {error,_} -> false
                           end)
  	    end).
@@ -42,6 +45,7 @@ prop_parse() ->
 ?LITERAL('(').
 ?LITERAL('.').
 ?LITERAL(',').
+?LITERAL(':').
 ?LITERAL('message').
 ?LITERAL('enum').
 ?LITERAL('service').
@@ -56,8 +60,6 @@ prop_parse() ->
 ?LITERAL('rpc').
 ?LITERAL('returns').
 ?LITERAL('group').
-
-'$empty'() -> [].
 
 identifier() ->
     {identifier, nat(), word()}.
