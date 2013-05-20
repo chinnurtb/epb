@@ -1,4 +1,4 @@
-# epb
+# epb [![Build Status](https://travis-ci.org/seancribbs/epb.png)](https://travis-ci.org/seancribbs/epb)
 
 Erlang protocol buffers library. This is born out of rage against
 [erlang_protobuffs](//github.com/basho/erlang_protobuffs), which uses a (working
