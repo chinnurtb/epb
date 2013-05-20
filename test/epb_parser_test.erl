@@ -10,7 +10,7 @@ parser_passing_test_() ->
      {File ++ " should parse",
       fun() ->
               {ok, Tokens, _} = epb_scanner:file(File),
-              ?assertMatch({ok, AST}, epb_parser:parse(Tokens))
+              ?assertMatch({ok, _AST}, epb_parser:parse(Tokens))
       end}
      || File <- ?PASSING_FIXTURES ].
 

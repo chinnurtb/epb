@@ -3,6 +3,7 @@
 all: compile
 
 clean:
+	rm -rf current_counterexample.eqc erl_crash.dump
 	@rebar clean
 
 compile:
