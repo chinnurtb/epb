@@ -164,14 +164,14 @@ unescape_char([C|T]) ->  {C, T}.
 hex_to_int([$+|Hex]) ->
     hex_to_int(Hex);
 hex_to_int([$-|Hex]) ->
-    hex_to_int(Hex);
+    -hex_to_int(Hex);
 hex_to_int("0x"++Hex) ->
     list_to_integer(Hex, 16).
 
 oct_to_int([$+|Oct]) ->
     oct_to_int(Oct);
 oct_to_int([$-|Oct]) ->
-    oct_to_int(Oct);
+    -oct_to_int(Oct);
 oct_to_int([$0|Oct]) ->
     list_to_integer(Oct, 8).
 
