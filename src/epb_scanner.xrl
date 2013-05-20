@@ -185,6 +185,8 @@ parse_exp_number(Chars) ->
             parse_float(re:replace(Chars, "[eE]", ".0&", [{return, list}]))
     end.
 
+%% NOTE: 'inf' is more proto-like, but 'infinity' is used in other
+%% places in Erlang for the same meaning.
 special_float("-inf") -> '-infinity';
 special_float("+inf") -> infinity;
 special_float("inf") -> infinity;
