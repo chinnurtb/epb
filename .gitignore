@@ -12,4 +12,5 @@ src/epb_scanner.erl
 erl_crash.dump
 .DS_Store
 /.eqc-info
+/.qc
 /current_counterexample.eqc
