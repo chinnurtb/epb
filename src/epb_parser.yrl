@@ -118,23 +118,30 @@ extension -> extensions integer ';' : #extensions{min=unpack('$2'), max=unpack('
 extension -> extensions integer to max ';'     : #extensions{min=unpack('$2'), max=max, line=line('$1')}.
 extension -> extensions integer to integer ';' : #extensions{min=unpack('$2'), max=unpack('$4'), line=line('$1')}.
 
-group_decl -> rule group field_name '=' integer '{' end_block : #group{id=unpack('$5'), name='$3', rule=unpack('$1'), line=line('$1')}.
-group_decl -> rule group field_name '=' integer '{' group_contents end_block : #group{id=unpack('$5'), name='$3', rule=unpack('$1'), decls='$7', line=line('$1')}.
+group_decl -> rule group field_name '=' integer '{' end_block : #group{id=unpack('$5'),
+                                                                       name='$3',
+                                                                       rule=unpack('$1'),
+                                                                       line=line('$1')}.
+group_decl -> rule group field_name '=' integer '{' group_contents end_block : #group{id=unpack('$5'),
+                                                                                      name='$3',
+                                                                                      rule=unpack('$1'),
+                                                                                      decls='$7',
+                                                                                      line=line('$1')}.
 
-group_contents -> field : '$1'.
-group_contents -> field group_contents : '$2'.
+group_contents -> field : ['$1'].
+group_contents -> field group_contents : ['$1'|'$2'].
 
-field -> rule field_type field_name '=' integer '[' field_options ']' ';'      : #field{id=unpack('$5'), name='$3',
-                                                                                        type='$2', rule=unpack('$1'),
-                                                                                        options='$7', line=line('$1')}.
+field -> rule field_type field_name '=' integer '[' field_options ']' ';' : #field{id=unpack('$5'), name='$3',
+                                                                                   type='$2', rule=unpack('$1'),
+                                                                                   options='$7', line=line('$1')}.
 
-field -> rule field_type field_name '=' integer '[' ']' ';'      : #field{id=unpack('$5'), name='$3',
-                                                                          type='$2', rule=unpack('$1'),
-                                                                          line=line('$1')}.
+field -> rule field_type field_name '=' integer '[' ']' ';' : #field{id=unpack('$5'), name='$3',
+                                                                     type='$2', rule=unpack('$1'),
+                                                                     line=line('$1')}.
 
-field -> rule field_type field_name '=' integer ';'      : #field{id=unpack('$5'), name='$3',
-                                                                  type='$2', rule=unpack('$1'),
-                                                                  line=line('$1')}.
+field -> rule field_type field_name '=' integer ';' : #field{id=unpack('$5'), name='$3',
+                                                             type='$2', rule=unpack('$1'),
+                                                             line=line('$1')}.
 
 field_name -> identifier : unpack('$1').
 field_name -> keyword_as_id : '$1'.
@@ -156,8 +163,9 @@ message_literal -> '[' nested_id ']' '{' '}' : #message_literal{fields=[], exten
 message_literal -> '[' nested_id ']' '{' message_literal_fields '}' : #message_literal{fields='$5', extend='$2', line=line('$1')}.
 message_literal -> '{' '}' : #message_literal{fields=[], line=line('$1')}.
 message_literal -> '{' message_literal_fields '}' : #message_literal{fields='$2', line=line('$1')}.
+message_literal -> '{' message_literal '}' : '$2'.
 
-message_literal_fields -> field_literal : '$1'.
+message_literal_fields -> field_literal : ['$1'].
 message_literal_fields -> field_literal message_literal_fields : ['$1'|'$2'].
 
 field_literal -> identifier message_literal : #field_literal{name=unpack('$1'), value='$2', line=line('$1')}.
@@ -166,7 +174,6 @@ field_literal -> identifier ':' field_literal_value : #field_literal{name=unpack
 field_literal_value -> string : unpack('$1').
 field_literal_value -> integer : unpack('$1').
 field_literal_value -> float : unpack('$1').
-
 
 field_type -> nested_id : '$1'.
 field_type -> type      : unpack('$1').
