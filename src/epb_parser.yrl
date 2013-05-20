@@ -150,7 +150,7 @@ field_options -> field_option_pair : ['$1'].
 field_options -> field_option_pair ',' field_options : ['$1'|'$2'].
 
 field_option_pair -> identifier '=' optvalue : {unpack('$1'), '$3'}.
-field_option_pair -> '(' identifier ')' '=' optvalue : {unpack('$2'), '$3'}.
+field_option_pair -> '(' identifier ')' '=' optvalue : {unpack('$2'), '$5'}.
 
 nested_id -> '.' nested_id                    : ('$2')#id{line=line('$1')}.
 nested_id -> '(' nested_id ')'                : ('$2')#id{line=line('$1')}.
@@ -200,7 +200,7 @@ end_block -> '}' ';' : '$1'.
 
 Erlang code.
 -include("epb_ast.hrl").
--export([file/1]).
+-export([file/1, main/1]).
 
 unpack({_,_,V}) -> V.
 
@@ -212,4 +212,13 @@ file(Filename) ->
         {ok, Toks, _} ->
             parse(Toks);
         Other -> Other
+    end.
+
+main([Filename]) ->
+    case file(Filename) of
+        {ok, AST} ->
+            io:format("~p~n", [AST]);
+        Other ->
+            io:format("ERROR: ~p~n", [Other]),
+            halt(1)
     end.
