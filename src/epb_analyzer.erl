@@ -24,11 +24,18 @@
 %%
 %% @doc Semantic analysis of parsed Protocol Buffers definitions
 -module(epb_analyzer).
--export([analyze/2]).
+-export([file/1, analyze/2]).
+-include("epb_ast.hrl").
 
 analyze(_Name, _AST) ->
     %% TODO Resolve, parse and analyze imports
     %% TODO Build symbol table, normalizing names to fully-qualified names
     %% TODO Check for proper definitions of symbols, resolve to absolute names
     %% TODO Normalize defaults
+file(Filename) ->
+    case epb_parser:file(Filename) of
+        {ok, AST} ->
+            analyze(Filename, AST);
+        Other -> Other
+    end.
     ok.
