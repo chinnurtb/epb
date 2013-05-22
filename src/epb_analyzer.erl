@@ -48,14 +48,19 @@ string(Name, Str) ->
         Else -> Else
     end.
 
+%%-------------------------
+%% Analysis high-level
+%%-------------------------
+
+%% @doc Invokes semantic analysis on the named file with the given
+%% AST.
+-spec analyze(string(), [ast_node()]) -> {ok, #proto{}} | {error, any()}.
 analyze(Name, AST) ->
     analyze_passes(#proto{name=Name}, AST, ?PASSES).
 
-%%-------------------------
-%% Internal functions
-%%-------------------------
 
 %% @doc Folds through the analyzer passes with early abort.
+%% @private
 analyze_passes(P, _AST, []) ->
     {ok, P};
 analyze_passes(P, AST, [Pass|Rest]) ->
@@ -66,6 +71,12 @@ analyze_passes(P, AST, [Pass|Rest]) ->
             Error
     end.
 
+
+%%-------------------------
+%% Analysis checks
+%%-------------------------
+
+%% @doc Check and assignment for package declaration.
 check_package(P, AST) ->
     case find_packages(AST) of
         [] -> {ok, P};
@@ -75,5 +86,12 @@ check_package(P, AST) ->
             {error, {multiple_packages, [Packages]}}
     end.
 
+
+
+%%-------------------------
+%% Utility functions
+%%-------------------------
+
+%% @doc Finds package declarations in the AST.
 find_packages(AST) ->
     [ Pkg || Pkg <- AST, is_record(Pkg, package) ].

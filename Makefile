@@ -16,3 +16,6 @@ eunit: compile
 	@rebar eunit skip_deps=true
 
 test: eunit qc
+
+dialyze: compile
+	@dialyzer ebin/*.beam

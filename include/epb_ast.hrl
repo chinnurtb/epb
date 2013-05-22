@@ -39,6 +39,13 @@
 -record(message_literal, {fields, extend, line}).
 -record(field_literal, {name, value, line}).
 
+-type ast_node() :: #package{} | #message{} | #extend{} |
+                    #enum{} | #enumval{} | #service{} |
+                    #option{} | #import{} | #group{} |
+                    #field{} | #rpc{} | #extensions{} |
+                    #id{} | #message_literal{} | #field_literal{}.
+
+-spec ast_line(ast_node()) -> pos_integer().
 ast_line(#package{line=L}) -> L;
 ast_line(#message{line=L}) -> L;
 ast_line(#extend{line=L}) -> L;

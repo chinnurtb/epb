@@ -47,5 +47,4 @@ package_def_test_() ->
                     ?A("package foo.bar.baz;\nmessage Foo {}\npackage quine;"))
       }].
 
-      
 -endif.
