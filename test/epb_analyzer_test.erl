@@ -34,17 +34,18 @@ name_test() ->
     ?assertEqual("name_test.proto", P#proto.name).
 
 package_def_test_() ->
-    [{"no package def is valid",
+    [{".proto without package declaration is VALID",
       ?_assertMatch({ok, #proto{package=undefined}},
                     ?A("message Foo {}\n"))
       },
-     {"single package def is valid",
+     {".proto with single package declaration is VALID",
       ?_assertMatch({ok, #proto{package=["foo", "bar", "baz"]}},
                     ?A("package foo.bar.baz;\nmessage Foo {}\n"))
      },
-     {"multiple package definitions is error",
+     {".proto with multiple package definitions is INVALID",
       ?_assertMatch({error, {multiple_packages, L}},
                     ?A("package foo.bar.baz;\nmessage Foo {}\npackage quine;"))
       }].
+
       
 -endif.
