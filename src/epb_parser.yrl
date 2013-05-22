@@ -251,13 +251,20 @@ Erlang code.
 %%
 %% @doc Syntax analysis for Protocol Buffers definitions
 
+-export([file/1, main/1, string/1]).
 -include("epb_ast.hrl").
--export([file/1, main/1]).
 
 unpack({_,_,V}) -> V.
 
 line({_,L,_}) -> L;
 line({_,L}) -> L.
+
+string(String) ->
+    case epb_scanner:string(String) of
+        {ok, Toks, _} ->
+            parse(Toks);
+        Other -> Other
+    end.
 
 file(Filename) ->
     case epb_scanner:file(Filename) of
