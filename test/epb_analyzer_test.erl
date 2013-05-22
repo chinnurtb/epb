@@ -43,7 +43,7 @@ package_def_test_() ->
                     ?A("package foo.bar.baz;\nmessage Foo {}\n"))
      },
      {".proto with multiple package definitions is INVALID",
-      ?_assertMatch({error, {multiple_packages, L}},
+      ?_assertMatch({error, {multiple_packages, _L}},
                     ?A("package foo.bar.baz;\nmessage Foo {}\npackage quine;"))
       }].
 

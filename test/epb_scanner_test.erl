@@ -7,7 +7,7 @@
 
 scanner_test_() ->
     [
-     {File ++ " should scan",
+     {filename:basename(File) ++ " should scan",
       fun() ->
               {ok, Bin} = file:read_file(File),
               String = unicode:characters_to_list(Bin),
