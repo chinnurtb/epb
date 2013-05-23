@@ -22,11 +22,10 @@
 %% FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 %% OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% @doc Semantic analysis header for Protocol Buffers definitions
--record(symbol, {name, type, attributes=[]}).
--record(proto, {name,
-                package,
-                imports=[],
-                options=[],
-                env,
-                st}).
+%% @doc Finds imported .proto files in the given paths
+-module(epb_import).
+-export([resolve/2]).
+
+resolve(_,_) ->
+    %% TODO
+    {ok, []}.
